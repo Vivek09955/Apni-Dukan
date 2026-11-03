@@ -41,11 +41,18 @@ export const INDIAN_STATES = [
 
 export const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
+// Preprocess phone: strip +91, spaces, dashes → keep last 10 digits
+const phoneSchema = z
+  .string()
+  .trim()
+  .transform((val) => val.replace(/[\s\-+]/g, '').replace(/^91/, ''))
+  .pipe(z.string().regex(/^[0-9]{10}$/, 'Phone number must be a 10-digit number'));
+
 const addressSchema = z.object({
-  line1: z.string().trim().optional(),
-  line2: z.string().trim().optional(),
-  city: z.string().trim().optional(),
-  state: z.string().trim().optional(),
+  line1: z.string().trim().optional().or(z.literal('')),
+  line2: z.string().trim().optional().or(z.literal('')),
+  city: z.string().trim().optional().or(z.literal('')),
+  state: z.string().trim().optional().or(z.literal('')),
   pincode: z.string().trim().regex(/^[1-9][0-9]{5}$/, 'Invalid Indian pincode').optional().or(z.literal('')),
 });
 
@@ -67,10 +74,7 @@ export const createBusinessSchema = z.object({
     .max(100, 'Business name cannot exceed 100 characters'),
   logo: z.string().trim().url('Invalid logo URL').optional().or(z.literal('')),
   address: addressSchema.optional(),
-  phone: z
-    .string({ required_error: 'Phone number is required' })
-    .trim()
-    .regex(/^[0-9]{10}$/, 'Phone number must be a 10-digit number'),
+  phone: phoneSchema,
   email: z
     .string({ required_error: 'Email is required' })
     .trim()
@@ -80,7 +84,10 @@ export const createBusinessSchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(GSTIN_REGEX, 'Invalid GSTIN format. Example: 27AAAAA0000A1Z5')
+    .refine(
+      (val) => val === '' || GSTIN_REGEX.test(val),
+      { message: 'Invalid GSTIN format. Example: 27AAAAA0000A1Z5' }
+    )
     .optional()
     .or(z.literal('')),
   state: z.enum(INDIAN_STATES, {
@@ -97,13 +104,16 @@ export const updateBusinessSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters long').max(100).optional(),
   logo: z.string().trim().url('Invalid logo URL').optional().or(z.literal('')),
   address: addressSchema.optional(),
-  phone: z.string().trim().regex(/^[0-9]{10}$/, 'Phone number must be a 10-digit number').optional(),
-  email: z.string().trim().toLowerCase().email('Please provide a valid email address').optional(),
+  phone: phoneSchema.optional(),
+  email: z.string().trim().toLowerCase().email('Please provide a valid email address').optional().or(z.literal('')),
   gstin: z
     .string()
     .trim()
     .toUpperCase()
-    .regex(GSTIN_REGEX, 'Invalid GSTIN format. Example: 27AAAAA0000A1Z5')
+    .refine(
+      (val) => val === '' || GSTIN_REGEX.test(val),
+      { message: 'Invalid GSTIN format. Example: 27AAAAA0000A1Z5' }
+    )
     .optional()
     .or(z.literal('')),
   state: z.enum(INDIAN_STATES).optional(),

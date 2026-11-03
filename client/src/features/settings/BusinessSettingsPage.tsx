@@ -147,7 +147,13 @@ export function BusinessSettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['businesses'] })
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || 'Failed to update business settings')
+      const serverErrors = err?.response?.data?.errors;
+      if (serverErrors && Array.isArray(serverErrors)) {
+        const messages = serverErrors.map((e: any) => `${e.field}: ${e.message}`).join('\n');
+        toast.error(messages || 'Failed to update business settings');
+      } else {
+        toast.error(err?.response?.data?.message || 'Failed to update business settings');
+      }
     },
   })
 
