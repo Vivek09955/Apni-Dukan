@@ -33,10 +33,11 @@ import { createDefaultAccounts } from '../utils/defaultChartOfAccounts';
 import { calculateLineItem, calculateInvoiceTotals } from '../utils/gstCalculator';
 
 async function runSeed() {
-  const isForce = process.argv.includes('--force');
+  const isForce = process.argv.includes('--force') || process.argv.includes('--confirm') || process.argv.includes('--yes');
   if (!isForce) {
-    console.error('\n[Seed Error] Missing safety flag! Database clearing requires --force');
-    console.error('Usage: npm run seed -- --force\n');
+    console.error('\n[Seed Error] Missing safety flag! Database clearing requires confirmation.');
+    console.error('Usage: npm run seed -- --confirm');
+    console.error('   or: npx tsx src/seed/seed.ts --confirm\n');
     process.exit(1);
   }
 
