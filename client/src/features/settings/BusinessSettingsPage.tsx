@@ -67,7 +67,7 @@ export function BusinessSettingsPage() {
     enabled: Boolean(currentBusiness?._id),
   })
 
-  const business: Business | null = businessData?.data || currentBusiness
+  const business: Business | null = (businessData?.data as any)?.business || businessData?.data || currentBusiness
 
   const {
     register,
@@ -139,7 +139,7 @@ export function BusinessSettingsPage() {
     },
     onSuccess: (res) => {
       toast.success('Business settings updated successfully!')
-      const updated = res?.data
+      const updated = (res?.data as any)?.business || res?.data
       if (updated) {
         setCurrentBusiness(updated)
       }

@@ -52,9 +52,16 @@ export const LoginPage: React.FC = () => {
         // Try to fetch businesses for this user
         try {
           const bizResponse = await getBusinesses()
-          if (bizResponse.success && bizResponse.data && bizResponse.data.length > 0) {
-            setBusinesses(bizResponse.data)
-            setCurrentBusiness(bizResponse.data[0])
+          const bizData = bizResponse?.data as any
+          // Server returns { businesses: [{ business: {...}, role, permissions }] }
+          const membershipList = bizData?.businesses || bizData || []
+          const businessList: any[] = Array.isArray(membershipList)
+            ? membershipList.map((m: any) => m.business || m)
+            : []
+
+          if (businessList.length > 0) {
+            setBusinesses(businessList)
+            setCurrentBusiness(businessList[0])
             toast.success(`Welcome back, ${user.name}!`)
             navigate('/dashboard')
             return

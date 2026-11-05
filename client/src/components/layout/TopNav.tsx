@@ -34,6 +34,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onToggleSidebar }) => {
     queryKey: ['notificationsUnreadCount', currentBusiness?._id],
     queryFn: () => getUnreadCount(),
     refetchInterval: 30000,
+    enabled: Boolean(currentBusiness?._id),
   })
 
   const unreadCount = countData?.data?.count ?? 0
