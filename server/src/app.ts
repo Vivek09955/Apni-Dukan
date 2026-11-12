@@ -1,5 +1,6 @@
 import express, { Express } from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -69,6 +70,8 @@ app.get('/api-docs.json', (req, res) => {
 });
 
 // ---------- Serve React Frontend in Production ----------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
