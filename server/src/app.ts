@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -38,10 +39,10 @@ if (config.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Global rate limiting: 100 requests per 15 minutes window
+// Global rate limiting: 200 requests per 15 minutes window
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -67,16 +68,21 @@ app.get('/api-docs.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
-// Root health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    timestamp: new Date().toISOString(),
-  });
+// ---------- Serve React Frontend in Production ----------
+const clientBuildPath = path.resolve(__dirname, '../../client/dist');
+app.use(express.static(clientBuildPath));
+
+// All non-API routes → serve React's index.html (SPA client-side routing)
+app.get('*', (req, res, next) => {
+  // Skip API and docs routes
+  if (req.path.startsWith('/api') || req.path.startsWith('/api-docs')) {
+    return next();
+  }
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
-// 404 handler for undefined routes
-app.use('*', (req, res) => {
+// 404 handler for undefined API routes
+app.use('/api/*', (req, res) => {
   res.status(404).json({
     success: false,
     message: `Cannot ${req.method} ${req.originalUrl}`,

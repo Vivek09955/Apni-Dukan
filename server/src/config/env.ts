@@ -7,7 +7,7 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.string().default('5000').transform((val) => parseInt(val, 10)),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  MONGODB_URI: z.string().min(1, 'MONGODB_URI is required').default('mongodb://localhost:27017/apni_dukan?replicaSet=rs0'),
+  MONGODB_URI: z.string().min(1, 'MONGODB_URI is required').default('mongodb://localhost:27017/apni_dukan'),
   JWT_ACCESS_SECRET: z.string().min(8, 'JWT_ACCESS_SECRET must be at least 8 characters').default('default_access_secret_key_change_in_production'),
   JWT_REFRESH_SECRET: z.string().min(8, 'JWT_REFRESH_SECRET must be at least 8 characters').default('default_refresh_secret_key_change_in_production'),
   JWT_ACCESS_EXPIRY: z.string().default('15m'),
