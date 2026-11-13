@@ -7,12 +7,13 @@ const startServer = async () => {
     // Connect to database
     await connectDB();
 
-    // Start HTTP server
-    const server = app.listen(config.PORT, () => {
+    // Start HTTP server — bind to 0.0.0.0 for cloud hosting (Render, Railway, etc.)
+    const HOST = '0.0.0.0';
+    const server = app.listen(config.PORT, HOST, () => {
       console.log(`=================================================`);
       console.log(`🚀 Apni Dukan API Server running on port ${config.PORT}`);
       console.log(`📡 Environment: ${config.NODE_ENV}`);
-      console.log(`🌐 Base URL: http://localhost:${config.PORT}/api`);
+      console.log(`🌐 Base URL: http://${HOST}:${config.PORT}/api`);
       console.log(`=================================================`);
     });
 
