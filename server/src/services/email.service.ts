@@ -22,6 +22,9 @@ const createTransporter = () => {
       user: config.SMTP_USER,
       pass: config.SMTP_PASS,
     },
+    connectionTimeout: 10000,  // 10 seconds to connect
+    greetingTimeout: 10000,    // 10 seconds for greeting
+    socketTimeout: 15000,      // 15 seconds socket timeout
   });
 };
 
@@ -171,8 +174,13 @@ const sendEmail = async (
 
     console.log(`[Email Service] Email sent successfully to ${to}, messageId: ${info.messageId}`);
     return true;
-  } catch (error) {
-    console.error(`[Email Service] Failed to send email to ${to}:`, error);
+  } catch (error: any) {
+    console.error(`[Email Service] ❌ Failed to send email to ${to}`);
+    console.error(`[Email Service] Error code: ${error.code}`);
+    console.error(`[Email Service] Error message: ${error.message}`);
+    console.error(`[Email Service] SMTP Host: ${config.SMTP_HOST}:${config.SMTP_PORT}`);
+    console.error(`[Email Service] SMTP User: ${config.SMTP_USER}`);
+    console.error(`[Email Service] Full error:`, error);
     return false;
   }
 };

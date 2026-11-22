@@ -15,6 +15,9 @@ import { swaggerSpec } from './swagger/config';
 
 export const app: Express = express();
 
+// Trust reverse proxy (Render, Heroku, etc.) — required for express-rate-limit & correct client IP
+app.set('trust proxy', 1);
+
 // Security headers
 app.use(helmet());
 
