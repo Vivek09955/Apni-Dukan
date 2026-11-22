@@ -13,7 +13,10 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:5173'),
-  // SMTP / Email settings (optional in dev, required in production for OTP emails)
+  // Email settings
+  // Option 1 (Recommended): Resend — works on all hosts (uses HTTPS, not SMTP)
+  RESEND_API_KEY: z.string().default(''),
+  // Option 2: SMTP (Nodemailer) — may be blocked on free hosting like Render
   SMTP_HOST: z.string().default(''),
   SMTP_PORT: z.string().default('587').transform((val) => parseInt(val, 10)),
   SMTP_USER: z.string().default(''),
