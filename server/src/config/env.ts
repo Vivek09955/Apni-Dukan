@@ -14,9 +14,13 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:5173'),
   // Email settings
-  // Option 1 (Recommended): Resend — works on all hosts (uses HTTPS, not SMTP)
+  // Option 1 (Recommended): Brevo — free 300 emails/day, works on all hosts, sends to ANY email
+  BREVO_API_KEY: z.string().default(''),
+  BREVO_SENDER_EMAIL: z.string().default(''),
+  BREVO_SENDER_NAME: z.string().default('Apni Dukan'),
+  // Option 2: Resend — free 100 emails/day but requires domain verification for non-test emails
   RESEND_API_KEY: z.string().default(''),
-  // Option 2: SMTP (Nodemailer) — may be blocked on free hosting like Render
+  // Option 3: SMTP (Nodemailer) — may be blocked on free hosting like Render
   SMTP_HOST: z.string().default(''),
   SMTP_PORT: z.string().default('587').transform((val) => parseInt(val, 10)),
   SMTP_USER: z.string().default(''),
