@@ -6,6 +6,7 @@ import {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
+  verifyOTPSchema,
   resetPasswordSchema,
 } from '../validators/auth.validator';
 
@@ -25,6 +26,9 @@ authRouter.post('/logout', authenticate, authController.logout);
 
 // POST /api/auth/forgot-password
 authRouter.post('/forgot-password', validateBody(forgotPasswordSchema), authController.forgotPassword);
+
+// POST /api/auth/verify-otp
+authRouter.post('/verify-otp', validateBody(verifyOTPSchema), authController.verifyResetOTP);
 
 // POST /api/auth/reset-password
 authRouter.post('/reset-password', validateBody(resetPasswordSchema), authController.resetPassword);

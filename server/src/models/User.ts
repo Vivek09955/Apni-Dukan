@@ -16,6 +16,10 @@ export interface IUser extends Document {
   refreshTokens: IRefreshToken[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  resetPasswordOTP?: string;
+  resetPasswordOTPExpiry?: Date;
+  emailVerificationOTP?: string;
+  emailVerificationOTPExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -70,6 +74,22 @@ const userSchema = new Schema<IUser>(
       select: false,
     },
     resetPasswordExpires: {
+      type: Date,
+      select: false,
+    },
+    resetPasswordOTP: {
+      type: String,
+      select: false,
+    },
+    resetPasswordOTPExpiry: {
+      type: Date,
+      select: false,
+    },
+    emailVerificationOTP: {
+      type: String,
+      select: false,
+    },
+    emailVerificationOTPExpiry: {
       type: Date,
       select: false,
     },

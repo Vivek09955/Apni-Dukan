@@ -9,6 +9,7 @@ import {
   UnauthorizedError,
 } from '../utils/errors';
 import { RegisterInput, LoginInput } from '../validators/auth.validator';
+import { emailService } from './email.service';
 
 export interface TokenPair {
   accessToken: string;
@@ -175,22 +176,77 @@ export const logout = async (userId: string, token?: string): Promise<void> => {
 };
 
 /**
- * Request password reset token
+ * Request password reset OTP — generates 6-digit OTP, hashes it, stores with 10min expiry, sends email
  */
-export const forgotPassword = async (email: string): Promise<string> => {
+export const forgotPassword = async (email: string): Promise<void> => {
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
-    // For security, don't reveal user existence in production,
-    // but return simulated token or empty string; prompt specifies:
-    // "Generate a reset token (crypto.randomBytes), store hash on user with expiry. Return the token"
-    throw new NotFoundError('No account found with this email address');
+    // For security, don't reveal whether the email exists in production
+    // But in dev, throw to help debugging
+    if (config.NODE_ENV === 'development') {
+      throw new NotFoundError('No account found with this email address');
+    }
+    // In production, silently return success to prevent email enumeration
+    return;
   }
 
+  // Generate 6-digit OTP
+  const otp = emailService.generateOTP();
+
+  // Hash OTP before storing (never store plaintext OTP in DB)
+  const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
+
+  // Store hashed OTP with 10 minute expiry
+  user.resetPasswordOTP = hashedOTP;
+  user.resetPasswordOTPExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  // Clear any old token-based reset data
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+
+  // Send OTP email
+  const emailSent = await emailService.sendPasswordResetOTP(
+    user.email,
+    otp,
+    user.name
+  );
+
+  if (!emailSent && config.NODE_ENV === 'production') {
+    throw new BadRequestError('Failed to send password reset email. Please try again.');
+  }
+
+  // In development, also log the OTP to console for testing
+  if (config.NODE_ENV === 'development') {
+    console.log(`[Auth] Password reset OTP for ${email}: ${otp}`);
+  }
+};
+
+/**
+ * Verify OTP for password reset
+ */
+export const verifyResetOTP = async (email: string, otp: string): Promise<string> => {
+  const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
+
+  const user = await User.findOne({
+    email: email.toLowerCase(),
+    resetPasswordOTP: hashedOTP,
+    resetPasswordOTPExpiry: { $gt: new Date() },
+  }).select('+resetPasswordOTP +resetPasswordOTPExpiry');
+
+  if (!user) {
+    throw new BadRequestError('Invalid or expired OTP. Please request a new one.');
+  }
+
+  // Generate a temporary reset token (valid for 5 minutes) so user can set new password
   const resetToken = crypto.randomBytes(32).toString('hex');
   const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
   user.resetPasswordToken = hashedToken;
-  user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour validity
+  user.resetPasswordExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+  // Clear OTP after successful verification
+  user.resetPasswordOTP = undefined;
+  user.resetPasswordOTPExpiry = undefined;
 
   await user.save();
 
@@ -228,6 +284,7 @@ export const authService = {
   refreshToken,
   logout,
   forgotPassword,
+  verifyResetOTP,
   resetPassword,
   generateAccessToken,
   generateRefreshToken,

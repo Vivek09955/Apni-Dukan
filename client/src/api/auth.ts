@@ -26,6 +26,11 @@ export const forgotPassword = async (email: string): Promise<ApiResponse<void>> 
   return response.data
 }
 
+export const verifyResetOTP = async (email: string, otp: string): Promise<ApiResponse<{ resetToken: string }>> => {
+  const response = await apiClient.post<ApiResponse<{ resetToken: string }>>('/auth/verify-otp', { email, otp })
+  return response.data
+}
+
 export const resetPassword = async (token: string, password: string): Promise<ApiResponse<void>> => {
   const response = await apiClient.post<ApiResponse<void>>('/auth/reset-password', { token, password })
   return response.data

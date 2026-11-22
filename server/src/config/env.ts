@@ -13,6 +13,12 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:5173'),
+  // SMTP / Email settings (optional in dev, required in production for OTP emails)
+  SMTP_HOST: z.string().default(''),
+  SMTP_PORT: z.string().default('587').transform((val) => parseInt(val, 10)),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASS: z.string().default(''),
+  SMTP_FROM: z.string().default('Apni Dukan <noreply@apnidukan.com>'),
 });
 
 const parseEnv = () => {

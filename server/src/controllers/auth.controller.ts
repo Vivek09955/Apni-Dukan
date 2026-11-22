@@ -83,13 +83,26 @@ export const logout = async (req: Request, res: Response, next: NextFunction): P
 
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const resetToken = await authService.forgotPassword(req.body.email);
+    await authService.forgotPassword(req.body.email);
 
     res.status(200).json({
       success: true,
-      message: 'Password reset token generated successfully',
+      message: 'If an account with that email exists, a password reset OTP has been sent.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyResetOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const resetToken = await authService.verifyResetOTP(req.body.email, req.body.otp);
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully',
       data: {
-        resetToken, // Included for development/testing
+        resetToken,
       },
     });
   } catch (error) {
@@ -197,6 +210,7 @@ export const authController = {
   refreshToken,
   logout,
   forgotPassword,
+  verifyResetOTP,
   resetPassword,
   getMe,
   updateProfile,
