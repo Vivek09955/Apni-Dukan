@@ -3,9 +3,12 @@ import { config } from './env';
 
 export const connectDB = async (): Promise<typeof mongoose> => {
   try {
+    console.log('[MongoDB] Connecting to database...');
     const conn = await mongoose.connect(config.MONGODB_URI, {
       autoIndex: config.NODE_ENV !== 'production',
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
     });
 
     console.log(`[MongoDB] Connected successfully: ${conn.connection.host}/${conn.connection.name}`);
