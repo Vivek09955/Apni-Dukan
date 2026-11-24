@@ -1,8 +1,18 @@
 import { apiClient } from './client'
 import type { ApiResponse, AuthResponse, LoginPayload, RegisterPayload, User } from '../types'
 
-export const registerUser = async (data: RegisterPayload): Promise<ApiResponse<AuthResponse>> => {
-  const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/register', data)
+export const registerUser = async (data: RegisterPayload): Promise<ApiResponse<{ user: User }>> => {
+  const response = await apiClient.post<ApiResponse<{ user: User }>>('/auth/register', data)
+  return response.data
+}
+
+export const verifyRegistrationOTP = async (email: string, otp: string): Promise<ApiResponse<AuthResponse>> => {
+  const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/verify-registration', { email, otp })
+  return response.data
+}
+
+export const resendRegistrationOTP = async (email: string): Promise<ApiResponse<void>> => {
+  const response = await apiClient.post<ApiResponse<void>>('/auth/resend-registration-otp', { email })
   return response.data
 }
 

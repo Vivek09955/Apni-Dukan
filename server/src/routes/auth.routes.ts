@@ -15,6 +15,12 @@ export const authRouter = Router();
 // POST /api/auth/register
 authRouter.post('/register', validateBody(registerSchema), authController.register);
 
+// POST /api/auth/verify-registration — verify email OTP after registration
+authRouter.post('/verify-registration', validateBody(verifyOTPSchema), authController.verifyRegistrationOTP);
+
+// POST /api/auth/resend-registration-otp — resend registration OTP
+authRouter.post('/resend-registration-otp', validateBody(forgotPasswordSchema), authController.resendRegistrationOTP);
+
 // POST /api/auth/login
 authRouter.post('/login', validateBody(loginSchema), authController.login);
 

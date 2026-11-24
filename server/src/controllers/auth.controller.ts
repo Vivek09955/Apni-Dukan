@@ -8,8 +8,46 @@ export const register = async (req: Request, res: Response, next: NextFunction):
     const user = await authService.register(req.body);
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: 'Registration successful. Please verify your email with the OTP sent to your inbox.',
       data: { user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyRegistrationOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { user, tokens } = await authService.verifyRegistrationOTP(req.body.email, req.body.otp);
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully. Welcome to Apni Dukan!',
+      data: {
+        user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendRegistrationOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    await authService.resendRegistrationOTP(req.body.email);
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification OTP resent to your email.',
     });
   } catch (error) {
     next(error);
@@ -206,6 +244,8 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 
 export const authController = {
   register,
+  verifyRegistrationOTP,
+  resendRegistrationOTP,
   login,
   refreshToken,
   logout,
