@@ -5,7 +5,7 @@ const TOKEN_KEY = 'apni_dukan_access_token'
 const BUSINESS_KEY = 'apni_dukan_current_business'
 
 export const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ apiClient.interceptors.response.use(
 
       try {
         const response = await axios.post<{ success: boolean; data: { accessToken: string } }>(
-          '/api/auth/refresh',
+          `${import.meta.env.VITE_API_URL || '/api'}/auth/refresh`,
           {},
           { withCredentials: true }
         )

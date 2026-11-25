@@ -21,10 +21,22 @@ app.set('trust proxy', 1);
 // Security headers
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration — allow multiple origins (Render + Netlify)
+const allowedOrigins = config.CLIENT_URL
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: config.CLIENT_URL,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-business-id'],
